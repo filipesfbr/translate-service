@@ -47,6 +47,7 @@ public class TranslateService {
         if (response.statusCode() == HttpStatus.OK.value()) {
             TranslateResponse translateResponse = mapper.readValue(response.body(), TranslateResponse.class);
             String translatedText = translateResponse.getData().getTranslations().get(0).getTranslatedText();
+            log.info("Language: FROM {} TO {}", translateRequest.getSourceLanguage(), translateRequest.getTargetLanguage());
             log.info("Text translated: " + translatedText);
             return translatedText;
         } else {
