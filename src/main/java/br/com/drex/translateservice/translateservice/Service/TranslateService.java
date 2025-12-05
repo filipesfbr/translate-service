@@ -1,8 +1,10 @@
 package br.com.drex.translateservice.translateservice.Service;
 
 import br.com.drex.translateservice.translateservice.Model.TranslateRequest;
+import br.com.drex.translateservice.translateservice.Model.TranslateResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -22,6 +24,8 @@ public class TranslateService {
     public static String translateText(TranslateRequest translateRequest) throws Exception {
         log.info("Trying to translate text received: " + translateRequest.getTextToTranslate());
 
+        ObjectMapper mapper = new ObjectMapper();
+
         String url = URL_API_GOOGLE + API_KEY;
 
         Map<Object, Object> data = new HashMap<>();
@@ -40,11 +44,12 @@ public class TranslateService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
-            String responseBody = response.body();
-            String translatedAdvice = extractTranslatedText(responseBody);
-            log.info("Advice translated: " + translatedAdvice);
-            return translatedAdvice;
+        if (response.statusCode() == HttpStatus.OK.value()) {
+            TranslateResponse translateResponse = mapper.readValue(response.body(), TranslateResponse.class);
+            String translatedText = translateResponse.getData().getTranslations().get(0).getTranslatedText();
+            log.info("Language: FROM {} TO {}", translateRequest.getSourceLanguage(), translateRequest.getTargetLanguage());
+            log.info("Text translated: " + translatedText);
+            return translatedText;
         } else {
             log.error("Error on translate text.");
             throw new RuntimeException("Error on translate text. Status code: " + response.statusCode());
@@ -61,8 +66,4 @@ public class TranslateService {
         return json.toString();
     }
 
-    private static String extractTranslatedText(String responseBody) {
-        String translatedText = responseBody.split("\"")[7];
-        return translatedText;
-    }
 }
