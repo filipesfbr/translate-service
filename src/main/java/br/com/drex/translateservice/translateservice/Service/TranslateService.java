@@ -19,7 +19,7 @@ import java.util.Map;
 public class TranslateService {
 
     private static final String URL_API_GOOGLE = "https://translation.googleapis.com/language/translate/v2?key=";
-    private static String API_KEY = "AIzaSyCVFqrK0z8mx7luZtvdnDL3gLf9ffRlfuE";
+    private static final String API_KEY = System.getenv("GOOGLE_TRANSLATE_API_KEY");
 
     public static String translateText(TranslateRequest translateRequest) throws Exception {
         log.info("Trying to translate text received: " + translateRequest.getTextToTranslate());
